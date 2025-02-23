@@ -3,7 +3,6 @@ services:
     name: txting-demo
     env: node
     buildCommand: |
-      npm install
       cd txting-app && npm install && npm run build
       cd ../server && npm install
     startCommand: cd server && npm start
@@ -14,4 +13,4 @@ services:
         value: 3000
       - key: FRONTEND_URL
         value: https://txting-demo.onrender.com
-    staticPublishPath: ./txting-app/dist/txting-app/browser
+    staticPublishPath: ./txting-app/dist/browser

@@ -32,7 +32,7 @@ const activeUsers = new Map(); // Store active socket connections with user info
 app.use(express.json());
 
 // Serve static files from Angular app
-app.use(express.static(path.join(__dirname, '../txting-app/dist/txting-app/browser')));
+app.use(express.static(path.join(__dirname, '../txting-app/dist/browser')));
 
 function sanitizeMessage(message) {
   if (typeof message !== 'string') return '';
@@ -312,7 +312,7 @@ server.listen(PORT, HOST, () => {
 
 // Add this before error handling middleware
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../txting-app/dist/txting-app/browser/index.html'));
+  res.sendFile(path.join(__dirname, '../txting-app/dist/browser/index.html'));
 });
 
 // Error handling for the Express app

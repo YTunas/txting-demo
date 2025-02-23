@@ -3,13 +3,16 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://txting-demo.onrender.com'
+    : 'http://localhost:4200',
   credentials: true
 };
 
@@ -27,6 +30,9 @@ const messageTimestamps = new Map();
 const activeUsers = new Map(); // Store active socket connections with user info
 
 app.use(express.json());
+
+// Serve static files from Angular app
+app.use(express.static(path.join(__dirname, '../txting-app/dist/txting-app/browser')));
 
 function sanitizeMessage(message) {
   if (typeof message !== 'string') return '';
@@ -302,6 +308,11 @@ const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; // Listen on all network interfaces
 server.listen(PORT, HOST, () => {
   console.log(`Server running on http://${HOST}:${PORT}`);
+});
+
+// Add this before error handling middleware
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../txting-app/dist/txting-app/browser/index.html'));
 });
 
 // Error handling for the Express app

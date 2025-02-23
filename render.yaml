@@ -2,11 +2,16 @@ services:
   - type: web
     name: txting-demo
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: |
+      npm install
+      cd txting-app && npm install && npm run build
+      cd ../server && npm install
+    startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
+      - key: FRONTEND_URL
+        value: https://txting-demo.onrender.com
     staticPublishPath: ./txting-app/dist/txting-app/browser

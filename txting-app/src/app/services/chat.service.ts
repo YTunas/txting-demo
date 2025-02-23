@@ -31,7 +31,7 @@ export class ChatService implements OnDestroy {
   private getApiUrl(): string {
     return window.location.hostname === 'localhost' 
       ? 'http://localhost:3000'
-      : 'https://txting-demo.onrender.com'; // Updated with Render URL
+      : 'https://txting-demo.onrender.com'; // Updated with actual Render.com URL
   }
 
   private initializeSocket() {

@@ -21,11 +21,17 @@ export class ChatService implements OnDestroy {
   private connectionStatus = new BehaviorSubject<boolean>(false);
   private roomId: string | null = null;
   private currentUser: any = null;
-  private apiUrl = process.env['API_URL'] || 'http://localhost:3000';
+  private apiUrl = this.getApiUrl();
 
   constructor(private authService: AuthService) {
     this.currentUser = this.authService.getCurrentUser();
     this.initializeSocket();
+  }
+
+  private getApiUrl(): string {
+    return window.location.hostname === 'localhost' 
+      ? 'http://localhost:3000'
+      : 'https://your-backend-url.onrender.com'; // This will be updated after deployment
   }
 
   private initializeSocket() {

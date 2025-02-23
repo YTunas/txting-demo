@@ -1,0 +1,15 @@
+<div class="chat-room-container">
+  <div *ngIf="!isInRoom" class="join-container">
+    <h2>Join or Create a Chat Room</h2>
+    <div class="input-group">
+      <input type="text" [(ngModel)]="roomId" placeholder="Enter Room ID">
+      <button (click)="joinRoom()">Join Room</button>
+    </div>
+    <button (click)="createRoom()">Create New Room</button>
+  </div>
+
+  <div *ngIf="isInRoom" class="room-info">
+    <h3>Room ID: {{ roomId }}</h3>
+    <app-chat-interface></app-chat-interface>
+  </div>
+</div>

@@ -19,14 +19,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Important: Serve static files before defining routes
-const distPath = path.join(__dirname, '..', 'txting-app', 'dist', 'txting-app', 'browser');
-console.log('Serving static files from:', distPath);
-app.use(express.static(distPath));
+// Important: Serve static files from current directory
+console.log('Current directory:', __dirname);
+app.use(express.static(__dirname));
 
-// Move the catch-all route before socket.io setup
+// Add catch-all route here, before socket.io setup
 app.get('*', (req, res) => {
-  const indexPath = path.join(distPath, 'index.html');
+  const indexPath = path.join(__dirname, 'index.html');
   console.log('Attempting to serve:', indexPath);
   if (!require('fs').existsSync(indexPath)) {
     console.error('index.html not found at:', indexPath);

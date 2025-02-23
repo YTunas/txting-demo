@@ -20,12 +20,15 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Important: Serve static files before defining routes
-const distPath = path.join(__dirname, '..', 'txting-app', 'dist', 'txting-app', 'browser');
+const distPath = path.join(__dirname, '..', 'txting-app', 'dist', 'browser');
+console.log('Serving static files from:', distPath); // Add logging for debugging
 app.use(express.static(distPath));
 
 // Add catch-all route here, before socket.io setup
 app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
+  const indexPath = path.join(distPath, 'index.html');
+  console.log('Attempting to serve:', indexPath); // Add logging for debugging
+  res.sendFile(indexPath);
 });
 
 const io = socketIo(server, {

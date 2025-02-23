@@ -7,9 +7,13 @@ services:
       cd txting-app
       npm install
       ng build --configuration production
+      ls -la dist/browser
       cd ../server
       npm install
-    startCommand: cd server && NODE_ENV=production node server.js
+    startCommand: |
+      cd server
+      ls -la ../txting-app/dist/browser
+      NODE_ENV=production node server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -17,4 +21,4 @@ services:
         value: 3000
       - key: FRONTEND_URL
         value: https://txting-demo.onrender.com
-    staticPublishPath: ./txting-app/dist/txting-app/browser
+    staticPublishPath: ./txting-app/dist/browser

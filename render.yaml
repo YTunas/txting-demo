@@ -7,13 +7,12 @@ services:
       cd txting-app
       npm install
       ng build --configuration production
-      ls -la dist/browser
       cd ../server
       npm install
+      mkdir -p dist
+      cp -r ../txting-app/dist/txting-app/browser ./dist/
     startCommand: |
-      cd server
-      ls -la ../txting-app/dist/browser
-      NODE_ENV=production node server.js
+      cd server && NODE_ENV=production node server.js
     envVars:
       - key: NODE_ENV
         value: production

@@ -21,6 +21,11 @@ const io = socketIo(server, {
   cors: corsOptions
 });
 
+// Important: Serve static files before defining routes
+const distPath = path.join(__dirname, '..', 'txting-app', 'dist', 'txting-app', 'browser');
+app.use(express.static(distPath));
+app.use(express.json());
+
 // Store users in a more structured way
 const users = new Map();
 const rooms = new Map();
@@ -28,29 +33,6 @@ const MAX_ROOM_SIZE = 50;
 const MESSAGE_RATE_LIMIT = 5;
 const messageTimestamps = new Map();
 const activeUsers = new Map(); // Store active socket connections with user info
-
-app.use(express.json());
-
-// Serve static files from Angular app
-app.use(express.static(path.join(__dirname, '../txting-app/dist/browser')));
-
-function sanitizeMessage(message) {
-  if (typeof message !== 'string') return '';
-  return message.slice(0, 1000).trim(); // Limit message length
-}
-
-function isRateLimited(userId) {
-  const now = Date.now();
-  const userTimestamps = messageTimestamps.get(userId) || [];
-  const recentMessages = userTimestamps.filter(timestamp => now - timestamp < 1000);
-  
-  if (recentMessages.length >= MESSAGE_RATE_LIMIT) {
-    return true;
-  }
-  
-  messageTimestamps.set(userId, [...recentMessages, now]);
-  return false;
-}
 
 // Password validation function
 function isValidPassword(password) {
@@ -310,9 +292,9 @@ server.listen(PORT, HOST, () => {
   console.log(`Server running on http://${HOST}:${PORT}`);
 });
 
-// Add this before error handling middleware
+// Move the catch-all route before socket.io setup
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../txting-app/dist/browser/index.html'));
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 // Error handling for the Express app

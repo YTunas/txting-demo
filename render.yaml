@@ -3,9 +3,13 @@ services:
     name: txting-demo
     env: node
     buildCommand: |
-      cd txting-app && npm install && npm run build
-      cd ../server && npm install
-    startCommand: cd server && NODE_ENV=production npm start
+      npm install -g @angular/cli
+      cd txting-app
+      npm install
+      ng build --configuration production
+      cd ../server
+      npm install
+    startCommand: cd server && NODE_ENV=production node server.js
     envVars:
       - key: NODE_ENV
         value: production

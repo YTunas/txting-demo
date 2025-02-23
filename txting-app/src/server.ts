@@ -41,6 +41,7 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use('/**', (req, res, next) => {
+  console.log('Angular SSR handling:', req.url);
   angularApp
     .handle(req)
     .then((response) =>
@@ -56,7 +57,7 @@ app.use('/**', (req, res, next) => {
 if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
   app.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
+    console.log(`Angular SSR server listening on http://localhost:${port}`);
   });
 }
 

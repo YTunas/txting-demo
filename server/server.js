@@ -1,12 +1,22 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import {
+  AngularNodeAppEngine,
+  createNodeRequestHandler,
+  writeResponseToNodeResponse
+} from '@angular/ssr/node';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-const server = http.createServer(app);
+const server = createServer(app);
 
 // CORS configuration
 const corsOptions = {
@@ -19,23 +29,20 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Important: Serve static files from current directory
-console.log('Current directory:', __dirname);
-app.use(express.static(__dirname));
+// Angular SSR setup
+const angularApp = new AngularNodeAppEngine();
 
-// Add catch-all route here, before socket.io setup
-app.get('*', (req, res) => {
-  const indexPath = path.join(__dirname, 'index.html');
-  console.log('Attempting to serve:', indexPath);
-  if (!require('fs').existsSync(indexPath)) {
-    console.error('index.html not found at:', indexPath);
-    return res.status(500).send('Server configuration error');
-  }
-  res.sendFile(indexPath);
-});
+// Important: Serve static files before defining routes
+const distPath = path.join(__dirname, '..', 'txting-app', 'dist', 'txting-app', 'browser');
+console.log('Serving static files from:', distPath);
+app.use(express.static(distPath, {
+  maxAge: '1y',
+  index: false,
+  redirect: false,
+}));
 
-// Socket.io setup after static files and catch-all route
-const io = socketIo(server, {
+// Socket.io setup
+const io = new Server(server, {
   cors: corsOptions
 });
 
@@ -319,19 +326,25 @@ io.on('connection', (socket) => {
   }
 });
 
+// Add catch-all route here for Angular SSR
+app.get('*', (req, res, next) => {
+  console.log('SSR request for:', req.url);
+  angularApp
+    .handle(req)
+    .then((response) =>
+      response ? writeResponseToNodeResponse(response, res) : next()
+    )
+    .catch(next);
+});
+
 const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0'; // Listen on all network interfaces
+const HOST = '0.0.0.0';
+
 server.listen(PORT, HOST, () => {
   console.log(`Server running on http://${HOST}:${PORT}`);
 });
 
-// Error handling for the Express app
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
-
-// Handle process errors
+// Error handling
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });

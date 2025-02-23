@@ -17,14 +17,20 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-const io = socketIo(server, {
-  cors: corsOptions
-});
+app.use(express.json());
 
 // Important: Serve static files before defining routes
 const distPath = path.join(__dirname, '..', 'txting-app', 'dist', 'txting-app', 'browser');
 app.use(express.static(distPath));
-app.use(express.json());
+
+// Add catch-all route here, before socket.io setup
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+const io = socketIo(server, {
+  cors: corsOptions
+});
 
 // Store users in a more structured way
 const users = new Map();
@@ -39,6 +45,26 @@ function isValidPassword(password) {
   return password.length >= 6 && 
          /[A-Z]/.test(password) && 
          /[0-9]/.test(password);
+}
+
+// Helper functions
+function sanitizeMessage(message) {
+  if (typeof message !== 'string') return '';
+  return message.slice(0, 1000).trim(); // Limit message length for safety
+}
+
+function isRateLimited(userId) {
+  const now = Date.now();
+  const userTimestamps = messageTimestamps.get(userId) || [];
+  // Remove timestamps older than 1 second
+  const recentMessages = userTimestamps.filter(timestamp => now - timestamp < 1000);
+  
+  if (recentMessages.length >= MESSAGE_RATE_LIMIT) {
+    return true;
+  }
+  
+  messageTimestamps.set(userId, [...recentMessages, now]);
+  return false;
 }
 
 // Registration endpoint with improved logging and validation
@@ -290,11 +316,6 @@ const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; // Listen on all network interfaces
 server.listen(PORT, HOST, () => {
   console.log(`Server running on http://${HOST}:${PORT}`);
-});
-
-// Move the catch-all route before socket.io setup
-app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 // Error handling for the Express app

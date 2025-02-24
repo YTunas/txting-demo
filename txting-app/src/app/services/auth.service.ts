@@ -23,12 +23,14 @@ export class AuthService {
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+    if (typeof window !== 'undefined') {
     if (this.isBrowser) {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         this.userSubject.next(JSON.parse(storedUser));
       }
     }
+  }
   }
 
   login(username: string, password: string): Observable<User> {
@@ -91,16 +93,20 @@ export class AuthService {
   }
 
   private setUser(user: User): void {
+    if (typeof window !== 'undefined') {
     if (this.isBrowser) {
       localStorage.setItem('user', JSON.stringify(user));
     }
+  }
     this.userSubject.next(user);
   }
 
   logout(): void {
+    if (typeof window !== 'undefined') {
     if (this.isBrowser) {
       localStorage.removeItem('user');
     }
+  }
     this.userSubject.next(null);
   }
 

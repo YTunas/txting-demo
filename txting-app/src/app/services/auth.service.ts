@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
+import { isPlatformBrowser } from '@angular/common';
 
 interface User {
   userId: string;
@@ -15,11 +16,18 @@ interface User {
 export class AuthService {
   private apiUrl = 'http://192.168.1.91:3000/api';
   private userSubject = new BehaviorSubject<User | null>(null);
+  private isBrowser: boolean;
   
-  constructor(private http: HttpClient) {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      this.userSubject.next(JSON.parse(storedUser));
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+    if (this.isBrowser) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        this.userSubject.next(JSON.parse(storedUser));
+      }
     }
   }
 
@@ -29,8 +37,7 @@ export class AuthService {
       .pipe(
         tap(user => {
           console.log('Login successful:', user);
-          localStorage.setItem('user', JSON.stringify(user));
-          this.userSubject.next(user);
+          this.setUser(user);
         }),
         catchError((error: HttpErrorResponse) => {
           console.error('Login error:', error);
@@ -83,8 +90,17 @@ export class AuthService {
     return throwError(() => ({ status: error.status, message }));
   }
 
+  private setUser(user: User): void {
+    if (this.isBrowser) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    this.userSubject.next(user);
+  }
+
   logout(): void {
-    localStorage.removeItem('user');
+    if (this.isBrowser) {
+      localStorage.removeItem('user');
+    }
     this.userSubject.next(null);
   }
 

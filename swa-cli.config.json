@@ -1,0 +1,14 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "txting.demo": {
+      "appLocation": "txting-app",
+      "outputLocation": "dist/txting-app",
+      "appBuildCommand": "npm run build",
+      "run": "npm start",
+      "appDevserverUrl": "http://localhost:4200",
+      "appName": "txting.demo",
+      "resourceGroup": "txting.demo-rg"
+    }
+  }
+}

@@ -6,17 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import {
-  AngularNodeAppEngine,
-  createNodeRequestHandler,
-  writeResponseToNodeResponse
-} from '@angular/ssr/node';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const serverDistFolder = __dirname;
-const browserDistFolder = resolve(serverDistFolder, './dist');
-
 const app = express();
 const server = createServer(app);
 
@@ -31,25 +23,14 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Serve static files
-app.use(express.static(browserDistFolder, {
-  maxAge: '1y',
-  index: false,
-  redirect: false,
-}));
-
-// Angular SSR setup
-const angularApp = new AngularNodeAppEngine();
-
-app.get('*', (req, res, next) => {
-  console.log('Angular SSR handling:', req.url);
-  angularApp
-    .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
-    .catch(next);
-});
+// Development vs Production handling
+if (process.env.NODE_ENV === 'production') {
+  const distPath = resolve(__dirname, './dist');
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(resolve(distPath, 'index.html'));
+  });
+}
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {

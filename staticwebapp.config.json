@@ -1,22 +1,22 @@
 {
-    "routes": [
-      {
-        "route": "/api/*",
-        "serve": "/api/index.js",
-        "methods": ["GET", "POST", "PUT", "DELETE"]
-      },
-      {
-        "route": "/*",
-        "serve": "/index.html/txting-app",
-        "statusCode": 200
-      }
-    ],
-    "navigationFallback": {
-      "rewrite": "/index.html",
-      "exclude": ["/images/*", "/css/*", "/api/*"]
+  "routes": [
+    {
+      "route": "/api/*",
+      "serve": "/api",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
     },
-    "globalHeaders": {
-      "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'",
-      "cache-control": "public, max-age=31536000"
+    {
+      "route": "/*",
+      "serve": "/index.html",
+      "statusCode": 200
     }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*", "/css/*", "/api/*"]
+  },
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'",
+    "cache-control": "public, max-age=31536000"
   }
+}

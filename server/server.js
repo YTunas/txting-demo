@@ -15,7 +15,7 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const serverDistFolder = __dirname;
-const browserDistFolder = resolve(serverDistFolder, './dist/browser');
+const browserDistFolder = resolve(serverDistFolder, './dist');
 
 const app = express();
 const server = createServer(app);
@@ -31,15 +31,30 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Angular SSR setup
-const angularApp = new AngularNodeAppEngine();
-
-console.log('Serving static files from:', browserDistFolder);
+// Serve static files
 app.use(express.static(browserDistFolder, {
   maxAge: '1y',
   index: false,
   redirect: false,
 }));
+
+// Angular SSR setup
+const angularApp = new AngularNodeAppEngine();
+
+app.get('*', (req, res, next) => {
+  console.log('Angular SSR handling:', req.url);
+  angularApp
+    .handle(req)
+    .then((response) =>
+      response ? writeResponseToNodeResponse(response, res) : next(),
+    )
+    .catch(next);
+});
+
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 
 // Socket.io setup
 const io = new Server(server, {
@@ -324,33 +339,6 @@ io.on('connection', (socket) => {
   } catch (error) {
     console.error('Error in socket connection:', error);
   }
-});
-
-// Add catch-all route here for Angular SSR
-app.get('*', async (req, res, next) => {
-  console.log('SSR request for:', req.url);
-  try {
-    const response = await angularApp.handle(req);
-    if (response) {
-      writeResponseToNodeResponse(response, res);
-    } else {
-      const indexHtml = resolve(browserDistFolder, 'index.html');
-      console.log('Serving index.html from:', indexHtml);
-      res.sendFile(indexHtml);
-    }
-  } catch (error) {
-    console.error('SSR Error:', error);
-    next(error);
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0';
-
-server.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
-  console.log('Environment:', process.env.NODE_ENV);
-  console.log('Browser folder:', browserDistFolder);
 });
 
 // Error handling

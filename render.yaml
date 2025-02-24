@@ -5,7 +5,7 @@ services:
     buildCommand: |
       cd txting-app
       npm install
-      npm install -g @angular/cli@19.1.8
+      npm install -g @angular/cli
       ng build --configuration production
       cd ../server
       npm install

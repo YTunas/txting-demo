@@ -65,14 +65,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B9E8EDE041654B2587D3314A4170B51D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7FF83571262E41EBA18487ED284E4CDC }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_75E27F9EDF724DB98901A3DCDC1E93D9 }}
 
-      - name: Deploy to Azure Web App
+      - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'tunatextclient'  # Change to your actual app name in Azure
+          app-name: 'tunatextclientangular'
           slot-name: 'Production'
           package: .
